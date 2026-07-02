@@ -1,0 +1,6 @@
+/* Minimal styles to satisfy app import */
+:root{
+  --primary:#2563eb;
+}
+html,body,#root{height:100%;margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif}
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
