@@ -10,7 +10,6 @@ import Testimonials from "../Component/Testimonials/Testimonials";
 import CallToAction from "../Component/CallToAction/CallToAction";
 import Footer from "../Component/Footer/Footer";
 
-
 function Home() {
   return (
     <>
