@@ -8,7 +8,18 @@ const electionsRoutes = require('./routes/elections');
 
 const app = express();
 app.use(helmet());
-app.use(cors());
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://voter-44bt.vercel.app,http://localhost:5173,http://localhost:3000').split(',');
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
+    return callback(new Error('CORS policy: Origin not allowed'));
+  },
+  credentials: true,
+}));
+
+app.options('*', cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../Component/Navbar/Navbar";
-import API_URL from "../api/api";
+import axios from "../api/axios";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -24,15 +24,11 @@ function Dashboard() {
 
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/api/elections`);
-        const data = await response.json();
-        if (response.ok) {
-          setElections(data);
-        } else {
-          setError(data.error || "Failed to load elections");
-        }
+        const response = await axios.get("/api/elections");
+        setElections(response.data || []);
       } catch (err) {
-        setError("Network error: " + err.message);
+        const msg = err?.response?.data?.error || err.message || "Failed to load elections";
+        setError(msg);
       } finally {
         setLoading(false);
       }

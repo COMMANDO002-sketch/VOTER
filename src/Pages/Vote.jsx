@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../Component/Navbar/Navbar";
-import API_URL from "../api/api";
+import axios from "../api/axios";
 
 function Vote() {
   const [searchParams] = useSearchParams();
@@ -24,15 +24,11 @@ function Vote() {
 
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/api/elections/${electionId}`);
-        const data = await response.json();
-        if (response.ok) {
-          setElection(data);
-        } else {
-          setError(data.error || "Failed to load election");
-        }
+        const response = await axios.get(`/api/elections/${electionId}`);
+        setElection(response.data);
       } catch (err) {
-        setError("Network error: " + err.message);
+        const msg = err?.response?.data?.error || err.message || "Failed to load election";
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -47,35 +43,23 @@ function Vote() {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Please login to vote");
-      navigate("/login");
-      return;
-    }
-
     try {
       setSubmitting(true);
       setError("");
-      const response = await fetch(`${API_URL}/api/elections/${electionId}/vote`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ candidateId: selectedCandidate }),
+      const response = await axios.post(`/api/elections/${electionId}/vote`, {
+        candidateId: selectedCandidate,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.status >= 200 && response.status < 300) {
         setSuccess("Your vote has been recorded successfully!");
         setTimeout(() => navigate("/elections"), 2000);
       } else {
+        const data = response.data || {};
         setError(data.error || "Failed to record vote");
       }
     } catch (err) {
-      setError("Network error: " + err.message);
+      const msg = err?.response?.data?.error || err.message || "Failed to record vote";
+      setError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -90,10 +74,10 @@ function Vote() {
       <main style={{ padding: 40 }}>
         <h2>Vote - {election?.title}</h2>
         <p>{election?.description}</p>
-        
+
         {error && <div style={{ color: "red", marginBottom: 16 }}>{error}</div>}
         {success && <div style={{ color: "green", marginBottom: 16 }}>{success}</div>}
-        
+
         <section style={{ marginTop: 24, maxWidth: 760 }}>
           {election?.candidates && election.candidates.length > 0 ? (
             <>

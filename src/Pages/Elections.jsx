@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../Component/Navbar/Navbar";
-import API_URL from "../api/api";
+import axios from "../api/axios";
 
 function Elections() {
   const [elections, setElections] = useState([]);
@@ -12,16 +12,11 @@ function Elections() {
     const fetchElections = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/api/elections`);
-        const contentType = response.headers.get("content-type") || "";
-        const data = contentType.includes("application/json") ? await response.json() : null;
-        if (response.ok) {
-          setElections(data || []);
-        } else {
-          setError(data?.error || `Failed to load elections (${response.status})`);
-        }
+        const response = await axios.get("/api/elections");
+        setElections(response.data || []);
       } catch (err) {
-        setError("Network error: " + err.message);
+        const msg = err?.response?.data?.error || err.message || "Failed to load elections";
+        setError(msg);
       } finally {
         setLoading(false);
       }
